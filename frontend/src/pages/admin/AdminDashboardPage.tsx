@@ -9,10 +9,9 @@ import {
   Save, Check, AlertCircle, Edit3, Trash2, Sliders, Layers, Tag, SlidersHorizontal,
   Upload, ArrowRight
 } from 'lucide-react';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar
-} from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
+import { InvoiceView } from '../../components/features/invoices/InvoiceView';
 
 // Mock Data strictly matching Excalidraw Wireframe diagram
 interface RentalOrderWireframe {
@@ -56,6 +55,7 @@ export const AdminDashboardPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [selectedInvoiceNum, setSelectedInvoiceNum] = useState<string | null>(null);
 
   // Settings State matching Excalidraw Wireframe
   const [enableLateFee, setEnableLateFee] = useState(true);
@@ -586,49 +586,83 @@ export const AdminDashboardPage: React.FC = () => {
             )}
 
             {ordersSegment === 'invoices' && (
-              <div className="glass-panel p-6 rounded-3xl border border-green-500/20 space-y-6 shadow-2xl animate-fade-in">
-                <div className="flex items-center justify-between border-b border-green-500/10 pb-4">
-                  <div>
-                    <h2 className="text-xl font-black text-white flex items-center gap-2">
-                      <Receipt className="w-5 h-5 text-blue-400" /> Invoices & Billing Management
-                    </h2>
-                    <p className="text-xs text-slate-400">Track paid invoices, pending billing, and deposit escrow release receipts</p>
+              selectedInvoiceNum ? (
+                <InvoiceView
+                  invoiceNumber={selectedInvoiceNum}
+                  onBack={() => setSelectedInvoiceNum(null)}
+                />
+              ) : (
+                <div className="glass-panel p-6 rounded-3xl border border-green-500/20 space-y-6 shadow-2xl animate-fade-in">
+                  <div className="flex items-center justify-between border-b border-green-500/10 pb-4">
+                    <div>
+                      <h2 className="text-xl font-black text-white flex items-center gap-2">
+                        <Receipt className="w-5 h-5 text-blue-400" /> Invoices & Billing Management
+                      </h2>
+                      <p className="text-xs text-slate-400">Track paid invoices, pending billing, and deposit escrow release receipts</p>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedInvoiceNum('INV/2026/0001')}
+                      className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg glow-purple transition-all flex items-center gap-1.5"
+                    >
+                      <Plus className="w-4 h-4" /> Open Invoice Page Wireframe
+                    </button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-green-500/20 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                          <th className="py-3 px-3">Invoice #</th>
+                          <th className="py-3 px-3">Order Ref</th>
+                          <th className="py-3 px-3">Customer</th>
+                          <th className="py-3 px-3">Billing Amount</th>
+                          <th className="py-3 px-3">Escrow Status</th>
+                          <th className="py-3 px-3">Payment Status</th>
+                          <th className="py-3 px-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-green-500/10">
+                        {[
+                          { inv: 'INV/2026/0001', ref: 'S00001', name: 'Mark Wood', amount: 'Rs 4,40,000', escrow: 'Rs 1,00,000 HELD', status: 'POSTED' },
+                          { inv: 'INV/2026/0002', ref: 'S00005', name: 'Smith', amount: 'Rs 1,52,000', escrow: 'Rs 50,000 HELD', status: 'DRAFT' },
+                        ].map((item, idx) => (
+                          <tr key={idx} className="hover:bg-emerald-500/5 transition-colors">
+                            <td className="py-3 px-3 font-mono font-bold text-blue-400">
+                              <button
+                                onClick={() => setSelectedInvoiceNum(item.inv)}
+                                className="hover:underline font-extrabold flex items-center gap-1"
+                              >
+                                {item.inv} <ArrowRight className="w-3 h-3 text-blue-400" />
+                              </button>
+                            </td>
+                            <td className="py-3 px-3 font-mono font-bold text-emerald-400">{item.ref}</td>
+                            <td className="py-3 px-3 font-bold text-white">{item.name}</td>
+                            <td className="py-3 px-3 font-extrabold text-white">{item.amount}</td>
+                            <td className="py-3 px-3 font-mono text-cyan-400 text-[10px] font-bold">{item.escrow}</td>
+                            <td className="py-3 px-3">
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                                item.status === 'POSTED'
+                                  ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                                  : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              }`}>
+                                {item.status}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-right">
+                              <button
+                                onClick={() => setSelectedInvoiceNum(item.inv)}
+                                className="px-3 py-1 rounded-lg bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white font-bold text-[10px] transition-colors"
+                              >
+                                View / Edit Wireframe
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-green-500/20 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                        <th className="py-3 px-3">Invoice #</th>
-                        <th className="py-3 px-3">Order Ref</th>
-                        <th className="py-3 px-3">Customer</th>
-                        <th className="py-3 px-3">Billing Amount</th>
-                        <th className="py-3 px-3">Escrow Status</th>
-                        <th className="py-3 px-3">Payment Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-green-500/10">
-                      {[
-                        { inv: 'INV-2026-001', ref: 'S00001', name: 'Mark Wood', amount: '$1,520', escrow: '$1,000 HELD', status: 'PAID' },
-                        { inv: 'INV-2026-002', ref: 'S00005', name: 'Smith', amount: '$1,520', escrow: '$800 HELD', status: 'PAID' },
-                      ].map((item, idx) => (
-                        <tr key={idx} className="hover:bg-emerald-500/5 transition-colors">
-                          <td className="py-3 px-3 font-mono font-bold text-blue-400">{item.inv}</td>
-                          <td className="py-3 px-3 font-mono font-bold text-emerald-400">{item.ref}</td>
-                          <td className="py-3 px-3 font-bold text-white">{item.name}</td>
-                          <td className="py-3 px-3 font-extrabold text-white">{item.amount}</td>
-                          <td className="py-3 px-3 font-mono text-cyan-400 text-[10px] font-bold">{item.escrow}</td>
-                          <td className="py-3 px-3">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                              {item.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              )
             )}
 
             {ordersSegment === 'customers' && (
