@@ -118,28 +118,31 @@ export const AdminDashboardPage: React.FC = () => {
     <div className="min-h-screen bg-[#07140F] text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950 flex flex-col">
       
       {/* ==================================================================== */}
-      {/* UNIFIED TOP HEADER MENU NAVIGATION */}
+      {/* UNIFIED & SPACIOUS TOP TASKBAR HEADER */}
       {/* ==================================================================== */}
-      <header className="bg-[#0B1A14] border-b border-green-500/20 px-6 py-3 flex items-center justify-between shadow-xl relative z-30">
+      <header className="bg-[#0B1A14] border-b border-green-500/20 px-6 py-4 flex flex-wrap items-center justify-between gap-4 shadow-2xl relative z-30">
         
-        {/* Brand Logo & Interactive Top Nav Tabs */}
-        <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 via-green-500 to-emerald-400 flex items-center justify-center shadow-lg glow-emerald">
-              <Shield className="w-4 h-4 text-slate-950" />
+        {/* Left Side: Brand & Main Navigation Tabs */}
+        <div className="flex items-center gap-6">
+          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 via-green-500 to-emerald-400 flex items-center justify-center shadow-lg glow-emerald group-hover:scale-105 transition-transform">
+              <Shield className="w-5 h-5 text-slate-950" />
             </div>
-            <span className="text-base font-black gradient-emerald-text">RentFlow AI</span>
+            <div>
+              <span className="text-base font-black gradient-emerald-text tracking-tight block">RentFlow AI</span>
+              <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest block">Admin Cockpit</span>
+            </div>
           </Link>
 
-          {/* Interactive Navigation Links: Orders, Schedule, Products, Reports, Settings */}
-          <nav className="hidden md:flex items-center gap-2 font-medium text-xs">
+          {/* Main Navigation Tabs */}
+          <nav className="hidden md:flex items-center gap-1.5 bg-[#07140F] p-1.5 rounded-2xl border border-green-500/20">
             {(['Orders', 'Schedule', 'Products', 'Reports', 'Settings'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-3.5 py-1.5 rounded-lg transition-all ${
+                className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
                   activeTab === tab
-                    ? 'bg-emerald-600 text-slate-950 font-black shadow-lg glow-emerald'
+                    ? 'bg-gradient-to-r from-emerald-600 to-green-500 text-slate-950 shadow-lg glow-emerald font-black scale-102'
                     : 'text-slate-300 hover:text-white hover:bg-[#13251D]'
                 }`}
               >
@@ -149,41 +152,113 @@ export const AdminDashboardPage: React.FC = () => {
           </nav>
         </div>
 
-        {/* Right Side: Initials Badges & Profile Dropdown */}
-        <div className="flex items-center gap-3">
-          
-          {/* Circular Initial Badges (E, T, I, T, P, I, C, E) from Excalidraw Wireframe */}
-          <div className="hidden xl:flex items-center gap-1">
-            {['E', 'T', 'I', 'T', 'P', 'I', 'C', 'E'].map((letter, idx) => (
-              <span
-                key={idx}
-                className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-[10px] flex items-center justify-center shadow-sm"
-              >
-                {letter}
-              </span>
-            ))}
+        {/* Middle Contextual Sub-Segments (Smoothly integrated inline) */}
+        {activeTab === 'Orders' && (
+          <div className="hidden lg:flex items-center gap-1.5 bg-[#07140F] p-1.5 rounded-2xl border border-purple-500/30">
+            <button
+              onClick={() => setOrdersSegment('all-orders')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                ordersSegment === 'all-orders'
+                  ? 'bg-purple-600 text-white shadow-lg glow-purple font-extrabold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Rental Orders
+            </button>
+            <button
+              onClick={() => setOrdersSegment('invoices')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                ordersSegment === 'invoices'
+                  ? 'bg-blue-600 text-white shadow-lg font-extrabold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Invoices & Billing
+            </button>
+            <button
+              onClick={() => setOrdersSegment('customers')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                ordersSegment === 'customers'
+                  ? 'bg-emerald-600 text-slate-950 shadow-lg font-extrabold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Customers Directory
+            </button>
           </div>
+        )}
 
-          {/* User Profile Bubble & Dropdown */}
+        {activeTab === 'Products' && (
+          <div className="hidden lg:flex items-center gap-1.5 bg-[#07140F] p-1.5 rounded-2xl border border-cyan-500/30">
+            <button
+              onClick={() => setProductsSegment('products')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                productsSegment === 'products'
+                  ? 'bg-cyan-600 text-white shadow-lg font-extrabold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Products Catalog
+            </button>
+            <button
+              onClick={() => setProductsSegment('price-list')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                productsSegment === 'price-list'
+                  ? 'bg-emerald-600 text-slate-950 shadow-lg font-extrabold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Price Lists
+            </button>
+            <button
+              onClick={() => setProductsSegment('attribute')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                productsSegment === 'attribute'
+                  ? 'bg-amber-600 text-white shadow-lg font-extrabold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Attributes & Specs
+            </button>
+            <button
+              onClick={() => setProductsSegment('rental-period')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                productsSegment === 'rental-period'
+                  ? 'bg-purple-600 text-white shadow-lg font-extrabold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Rental Duration Rules
+            </button>
+          </div>
+        )}
+
+        {/* Right Controls: Role Switcher & Profile Dropdown */}
+        <div className="flex items-center gap-4">
+          
+          {/* User Profile Dropdown Button */}
           <div className="relative">
             <button
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#13251D] border border-green-500/30 hover:border-emerald-400 transition-colors"
+              className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#07140F] border border-green-500/30 hover:border-emerald-400 transition-colors shadow-md"
             >
               <img
                 src={user?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
                 alt="Profile"
-                className="w-6 h-6 rounded-full object-cover border border-emerald-400"
+                className="w-7 h-7 rounded-full object-cover border border-emerald-400"
               />
-              <span className="text-xs font-bold text-white hidden sm:inline">{user?.full_name?.split(' ')[0] || 'Admin'}</span>
+              <div className="text-left hidden sm:block">
+                <span className="text-xs font-bold text-white block leading-tight">{user?.full_name?.split(' ')[0] || 'Admin'}</span>
+                <span className="text-[9px] text-emerald-400 font-extrabold uppercase tracking-wider block">Administrator</span>
+              </div>
             </button>
 
             {/* Profile Dropdown Menu */}
             {showProfileDropdown && (
-              <div className="absolute right-0 mt-2 w-48 glass-panel rounded-2xl p-2 border border-green-500/30 shadow-2xl space-y-1 z-50 animate-scale-up">
-                <div className="p-2 border-b border-green-500/10">
+              <div className="absolute right-0 mt-2 w-52 glass-panel rounded-2xl p-2 border border-green-500/30 shadow-2xl space-y-1 z-50 animate-scale-up">
+                <div className="p-2.5 border-b border-green-500/10">
                   <span className="text-xs font-bold text-white block truncate">{user?.full_name || 'Admin User'}</span>
-                  <span className="text-[10px] text-emerald-400 font-semibold uppercase">{user?.role || 'ADMIN'} ACCOUNT</span>
+                  <span className="text-[10px] text-emerald-400 font-semibold uppercase font-mono">{user?.email || 'admin@rentflow.com'}</span>
                 </div>
 
                 <Link
@@ -191,7 +266,7 @@ export const AdminDashboardPage: React.FC = () => {
                   onClick={() => setShowProfileDropdown(false)}
                   className="w-full px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-emerald-500/10 flex items-center gap-2 transition-colors"
                 >
-                  <User className="w-4 h-4 text-emerald-400" /> Profile
+                  <User className="w-4 h-4 text-emerald-400" /> Admin Profile
                 </Link>
 
                 <button
@@ -201,7 +276,7 @@ export const AdminDashboardPage: React.FC = () => {
                   }}
                   className="w-full px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors border-t border-green-500/10 mt-1"
                 >
-                  <LogOut className="w-4 h-4" /> Logout
+                  <LogOut className="w-4 h-4" /> Sign Out
                 </button>
               </div>
             )}
@@ -210,99 +285,6 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
 
       </header>
-
-      {/* ==================================================================== */}
-      {/* SUB-SEGMENTS BAR (UNDER ORDERS & PRODUCTS) */}
-      {/* ==================================================================== */}
-      <div className="bg-[#07140F] border-b border-green-500/10 px-6 py-2">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          
-          {/* Sub-Segments Pills when Orders Tab is Active */}
-          {activeTab === 'Orders' && (
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-slate-400 mr-1 uppercase tracking-wider">Orders Segments:</span>
-              <button
-                onClick={() => setOrdersSegment('all-orders')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  ordersSegment === 'all-orders'
-                    ? 'bg-purple-600 text-white shadow'
-                    : 'bg-[#0B1A14] text-slate-400 hover:text-white border border-green-500/20'
-                }`}
-              >
-                Rental Orders
-              </button>
-              <button
-                onClick={() => setOrdersSegment('invoices')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  ordersSegment === 'invoices'
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'bg-[#0B1A14] text-slate-400 hover:text-white border border-green-500/20'
-                }`}
-              >
-                Invoices & Billing
-              </button>
-              <button
-                onClick={() => setOrdersSegment('customers')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  ordersSegment === 'customers'
-                    ? 'bg-emerald-600 text-slate-950 font-black shadow'
-                    : 'bg-[#0B1A14] text-slate-400 hover:text-white border border-green-500/20'
-                }`}
-              >
-                Customers Directory
-              </button>
-            </div>
-          )}
-
-          {/* Sub-Segments Pills when Products Tab is Active */}
-          {activeTab === 'Products' && (
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-slate-400 mr-1 uppercase tracking-wider">Products Segments:</span>
-              <button
-                onClick={() => setProductsSegment('products')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  productsSegment === 'products'
-                    ? 'bg-cyan-600 text-white shadow'
-                    : 'bg-[#0B1A14] text-slate-400 hover:text-white border border-green-500/20'
-                }`}
-              >
-                Products Catalog
-              </button>
-              <button
-                onClick={() => setProductsSegment('price-list')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  productsSegment === 'price-list'
-                    ? 'bg-emerald-600 text-slate-950 font-black shadow'
-                    : 'bg-[#0B1A14] text-slate-400 hover:text-white border border-green-500/20'
-                }`}
-              >
-                Price Lists
-              </button>
-              <button
-                onClick={() => setProductsSegment('attribute')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  productsSegment === 'attribute'
-                    ? 'bg-amber-600 text-white shadow'
-                    : 'bg-[#0B1A14] text-slate-400 hover:text-white border border-green-500/20'
-                }`}
-              >
-                Attributes & Specs
-              </button>
-              <button
-                onClick={() => setProductsSegment('rental-period')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                  productsSegment === 'rental-period'
-                    ? 'bg-purple-600 text-white shadow'
-                    : 'bg-[#0B1A14] text-slate-400 hover:text-white border border-green-500/20'
-                }`}
-              >
-                Rental Duration Rules
-              </button>
-            </div>
-          )}
-
-        </div>
-      </div>
 
       {/* ==================================================================== */}
       {/* MAIN VIEW CONTENT CONTROLLER */}
