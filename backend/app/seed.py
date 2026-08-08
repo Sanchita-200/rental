@@ -21,7 +21,7 @@ def seed_database():
             print("Database already contains seed data.")
             return
 
-        print("Seeding RentFlow database...")
+        print("Seeding RentFlow database with rich equipment catalog...")
 
         # 1. Users
         admin_user = User(
@@ -53,9 +53,9 @@ def seed_database():
             image_url="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80"
         )
         cat_gaming = Category(
-            name="Gaming & VR",
-            slug="gaming-vr",
-            description="Next-gen consoles, VR headsets, handhelds, and gaming accessories",
+            name="Gaming & Electronics",
+            slug="gaming-electronics",
+            description="Consoles, 4K TVs, Laptops, VR headsets, and entertainment setups",
             image_url="https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=600&q=80"
         )
         cat_tools = Category(
@@ -70,16 +70,16 @@ def seed_database():
             description="High-output party speakers, wireless microphones, mixers, and DJ controllers",
             image_url="https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=600&q=80"
         )
-        cat_outdoor = Category(
-            name="Camping & Outdoor",
-            slug="camping-outdoor",
-            description="Tents, sleeping gear, portable generators, and hiking backpacks",
-            image_url="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80"
+        cat_furniture = Category(
+            name="Furniture & Appliances",
+            slug="furniture-appliances",
+            description="Executive desks, luxury sofas, outdoor event seating, and office equipment",
+            image_url="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80"
         )
-        db.add_all([cat_cameras, cat_gaming, cat_tools, cat_audio, cat_outdoor])
+        db.add_all([cat_cameras, cat_gaming, cat_tools, cat_audio, cat_furniture])
         db.flush()
 
-        # 3. Products
+        # 3. Products matching Wireframe
         p1 = Product(
             category_id=cat_cameras.id,
             title="Canon EOS R6 Mark II Mirrorless Camera Kit",
@@ -87,22 +87,17 @@ def seed_database():
             description="24.2 MP full-frame mirrorless camera capable of 4K 60p video. Includes 24-105mm F4 L IS USM lens, 2 dual batteries, and 128GB SD card.",
             base_daily_rate=1500.0,
             security_deposit_amount=5000.0,
-            images=[
-                "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80",
-                "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=800&q=80"
-            ],
+            images=["https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80"],
             status=ProductStatus.AVAILABLE
         )
         p2 = Product(
             category_id=cat_gaming.id,
             title="Sony PlayStation 5 Console (Disc Edition) + 2 Controllers",
             slug="sony-playstation-5-console",
-            description="PS5 disc edition console pre-loaded with FIFA 24 and Spider-Man 2. Comes with 2 DualSense wireless controllers.",
+            description="PS5 disc edition console pre-loaded with EA FC 24 and Spider-Man 2. Comes with 2 DualSense wireless controllers.",
             base_daily_rate=800.0,
             security_deposit_amount=3000.0,
-            images=[
-                "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=800&q=80"
-            ],
+            images=["https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=800&q=80"],
             status=ProductStatus.AVAILABLE
         )
         p3 = Product(
@@ -112,9 +107,7 @@ def seed_database():
             description="Brushless 2-tool combo kit featuring 1/2-inch drill/driver and 1/4-inch impact driver, 2x 2.0Ah batteries, charger, and contractor bag.",
             base_daily_rate=400.0,
             security_deposit_amount=1500.0,
-            images=[
-                "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=800&q=80"
-            ],
+            images=["https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=800&q=80"],
             status=ProductStatus.AVAILABLE
         )
         p4 = Product(
@@ -124,67 +117,69 @@ def seed_database():
             description="240W powerful JBL pro sound with dynamic light show, built-in wheels, 18-hour battery life, and dual wireless mic input.",
             base_daily_rate=700.0,
             security_deposit_amount=2500.0,
-            images=[
-                "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80"
-            ],
+            images=["https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80"],
             status=ProductStatus.AVAILABLE
         )
-        db.add_all([p1, p2, p3, p4])
+        p5 = Product(
+            category_id=cat_gaming.id,
+            title="Sony 4K Ultra HD Smart OLED TV (55 inch / 65 inch)",
+            slug="sony-4k-oled-tv",
+            description="Cognitive Processor XR, Dolby Vision HDR, and 120Hz HDMI 2.1 gaming support. Ideal for events and temporary setups.",
+            base_daily_rate=1200.0,
+            security_deposit_amount=4000.0,
+            images=["https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&w=800&q=80"],
+            status=ProductStatus.AVAILABLE
+        )
+        p6 = Product(
+            category_id=cat_furniture.id,
+            title="Modern 3-Seater Velvet Fabric Sofa (Blue / Mustard)",
+            slug="modern-3-seater-sofa",
+            description="Premium ergonomic 3-seater living room sofa. High-density foam seating with stain-resistant velvet fabric finish.",
+            base_daily_rate=650.0,
+            security_deposit_amount=2000.0,
+            images=["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80"],
+            status=ProductStatus.AVAILABLE
+        )
+        p7 = Product(
+            category_id=cat_gaming.id,
+            title="Apple MacBook Pro 16-inch M3 Max Workstation",
+            slug="macbook-pro-16-m3-max",
+            description="Apple M3 Max 16-core CPU, 40-core GPU, 36GB Unified Memory, 1TB SSD. Ready for 8K video editing and 3D rendering.",
+            base_daily_rate=2200.0,
+            security_deposit_amount=8000.0,
+            images=["https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80"],
+            status=ProductStatus.AVAILABLE
+        )
+        p8 = Product(
+            category_id=cat_furniture.id,
+            title="Executive Solid Wood Director Desk & Chair Suite",
+            slug="executive-director-desk-suite",
+            description="Solid mahogany wooden desk with cable management ports, matching leather executive chair, and side drawer unit.",
+            base_daily_rate=950.0,
+            security_deposit_amount=3000.0,
+            images=["https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=800&q=80"],
+            status=ProductStatus.MAINTENANCE # Out of stock for wireframe demonstration
+        )
+
+        db.add_all([p1, p2, p3, p4, p5, p6, p7, p8])
         db.flush()
 
         # 4. Product Variants (Physical Units with Serials and QR codes)
-        v1_a = ProductVariant(
-            product_id=p1.id,
-            sku="CANON-R6-U1",
-            variant_name="Canon R6 Unit #01",
-            serial_number="SN-CN-889101",
-            qr_code_identifier="RF-UNIT-CANON01",
-            condition_status=ConditionStatus.EXCELLENT,
-            is_available=True
-        )
-        v1_b = ProductVariant(
-            product_id=p1.id,
-            sku="CANON-R6-U2",
-            variant_name="Canon R6 Unit #02",
-            serial_number="SN-CN-889102",
-            qr_code_identifier="RF-UNIT-CANON02",
-            condition_status=ConditionStatus.EXCELLENT,
-            is_available=True
-        )
-        v2_a = ProductVariant(
-            product_id=p2.id,
-            sku="PS5-DISC-U1",
-            variant_name="PlayStation 5 Unit #01",
-            serial_number="SN-PS5-40192",
-            qr_code_identifier="RF-UNIT-PS501",
-            condition_status=ConditionStatus.EXCELLENT,
-            is_available=True
-        )
-        v3_a = ProductVariant(
-            product_id=p3.id,
-            sku="DEWALT-KIT-U1",
-            variant_name="DeWalt Drill Kit Unit #01",
-            serial_number="SN-DW-55410",
-            qr_code_identifier="RF-UNIT-DEWALT01",
-            condition_status=ConditionStatus.GOOD,
-            is_available=True
-        )
-        v4_a = ProductVariant(
-            product_id=p4.id,
-            sku="JBL-PB310-U1",
-            variant_name="JBL Speaker Unit #01",
-            serial_number="SN-JBL-99201",
-            qr_code_identifier="RF-UNIT-JBL01",
-            condition_status=ConditionStatus.EXCELLENT,
-            is_available=True
-        )
-        db.add_all([v1_a, v1_b, v2_a, v3_a, v4_a])
+        variants = [
+          ProductVariant(product_id=p1.id, sku="CANON-R6-U1", variant_name="Canon R6 Unit #01", serial_number="SN-CN-889101", qr_code_identifier="RF-UNIT-CANON01", condition_status=ConditionStatus.EXCELLENT, is_available=True),
+          ProductVariant(product_id=p2.id, sku="PS5-DISC-U1", variant_name="PlayStation 5 Unit #01", serial_number="SN-PS5-40192", qr_code_identifier="RF-UNIT-PS501", condition_status=ConditionStatus.EXCELLENT, is_available=True),
+          ProductVariant(product_id=p3.id, sku="DEWALT-KIT-U1", variant_name="DeWalt Drill Kit Unit #01", serial_number="SN-DW-55410", qr_code_identifier="RF-UNIT-DEWALT01", condition_status=ConditionStatus.GOOD, is_available=True),
+          ProductVariant(product_id=p4.id, sku="JBL-PB310-U1", variant_name="JBL Speaker Unit #01", serial_number="SN-JBL-99201", qr_code_identifier="RF-UNIT-JBL01", condition_status=ConditionStatus.EXCELLENT, is_available=True),
+          ProductVariant(product_id=p5.id, sku="SONY-TV55-U1", variant_name="Sony 55 inch OLED Unit #01", serial_number="SN-TV-55091", qr_code_identifier="RF-UNIT-TV5501", condition_status=ConditionStatus.EXCELLENT, is_available=True),
+          ProductVariant(product_id=p6.id, sku="SOFA-BLUE-U1", variant_name="Blue Sofa Unit #01", serial_number="SN-[#SOFA-BL01]", qr_code_identifier="RF-UNIT-SOFA01", condition_status=ConditionStatus.EXCELLENT, is_available=True),
+          ProductVariant(product_id=p7.id, sku="MBP-16M3-U1", variant_name="MacBook Pro 16 M3 #01", serial_number="SN-[#MBP-M301]", qr_code_identifier="RF-UNIT-MBP01", condition_status=ConditionStatus.EXCELLENT, is_available=True),
+          ProductVariant(product_id=p8.id, sku="DESK-WOOD-U1", variant_name="Director Desk #01", serial_number="SN-[#DESK-WD01]", qr_code_identifier="RF-UNIT-DESK01", condition_status=ConditionStatus.NEEDS_REPAIR, is_available=False),
+        ]
+        db.add_all(variants)
         db.flush()
 
-        # 5. Seed Sample Rentals (Active, Overdue, Completed)
+        # 5. Seed Sample Rentals (Active & Overdue)
         now = datetime.now(timezone.utc)
-
-        # Rental 1: Active Reserved Booking (Upcoming Pickup)
         r1_start = now + timedelta(days=1)
         r1_end = r1_start + timedelta(days=2)
         r1_code = "RF-2026-8891"
@@ -198,17 +193,16 @@ def seed_database():
             total_deposit_amount=5000.0,
             total_late_fee=0.0,
             grand_total=8000.0,
-            qr_pass_token=generate_rental_qr_token(r1_code, customer_user.id, "r1-placeholder-id")
+            qr_pass_token=generate_rental_qr_token(r1_code, customer_user.id, "placeholder")
         )
         db.add(r1)
         db.flush()
 
-        # Update QR pass with actual rental ID
         r1.qr_pass_token = generate_rental_qr_token(r1_code, customer_user.id, r1.id)
 
         item1 = RentalItem(
             rental_id=r1.id,
-            product_variant_id=v1_a.id,
+            product_variant_id=variants[0].id,
             daily_rate=1500.0,
             security_deposit=5000.0,
             rental_days=2,
@@ -230,53 +224,8 @@ def seed_database():
         )
         db.add_all([item1, dep1, pay1])
 
-        # Rental 2: Overdue Rental (To demonstrate late fee auto-calculation engine!)
-        r2_start = now - timedelta(days=4)
-        r2_end = now - timedelta(days=2) # Should have been returned 2 days ago!
-        r2_code = "RF-2026-7734"
-        r2 = Rental(
-            rental_code=r2_code,
-            user_id=customer_user.id,
-            status=RentalStatus.PICKED_UP,
-            start_date=r2_start,
-            end_date=r2_end,
-            subtotal_rent_amount=1600.0,
-            total_deposit_amount=3000.0,
-            total_late_fee=0.0,
-            grand_total=4600.0,
-            qr_pass_token="OVERDUE_PASS"
-        )
-        db.add(r2)
-        db.flush()
-
-        r2.qr_pass_token = generate_rental_qr_token(r2_code, customer_user.id, r2.id)
-
-        item2 = RentalItem(
-            rental_id=r2.id,
-            product_variant_id=v2_a.id,
-            daily_rate=800.0,
-            security_deposit=3000.0,
-            rental_days=2,
-            item_subtotal=1600.0
-        )
-        dep2 = SecurityDeposit(
-            rental_id=r2.id,
-            user_id=customer_user.id,
-            held_amount=3000.0,
-            status=DepositStatus.HELD
-        )
-        pay2 = Payment(
-            rental_id=r2.id,
-            transaction_id="TXN-RAZORPAY-7734002",
-            payment_method=PaymentMethod.RAZORPAY,
-            payment_type=PaymentType.INITIAL_BOOKING,
-            amount=4600.0,
-            status=PaymentStatus.SUCCESS
-        )
-        db.add_all([item2, dep2, pay2])
-
         db.commit()
-        print("Database successfully seeded with demo accounts, catalog, variants, and sample active/overdue rentals!")
+        print("Database successfully seeded with expanded wireframe equipment catalog & variants!")
     except Exception as e:
         print(f"Error seeding database: {e}")
         db.rollback()

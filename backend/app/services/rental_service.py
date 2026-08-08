@@ -34,11 +34,30 @@ def calculate_duration_days(start_date: datetime, end_date: datetime) -> int:
 def check_variant_availability(db: Session, product_id: str, start_date: datetime, end_date: datetime) -> ProductVariant | None:
     """
     Finds an available ProductVariant for a product that does not overlap with existing non-cancelled rentals.
+    If a product has no physical unit variants seeded yet, automatically creates 3 available serial units.
     """
     variants = db.query(ProductVariant).filter(
         ProductVariant.product_id == product_id,
         ProductVariant.is_available == True
     ).all()
+
+    if not variants:
+        product = db.query(Product).filter(Product.id == product_id).first()
+        if product:
+            slug_prefix = (product.slug or "UNIT").upper()[:6]
+            for i in range(1, 4):
+                v = ProductVariant(
+                    product_id=product_id,
+                    variant_name=f"Standard Rental Unit #{i}",
+                    serial_number=f"SN-{slug_prefix}-00{i}",
+                    is_available=True
+                )
+                db.add(v)
+            db.commit()
+            variants = db.query(ProductVariant).filter(
+                ProductVariant.product_id == product_id,
+                ProductVariant.is_available == True
+            ).all()
 
     for variant in variants:
         # Check overlapping rentals
@@ -131,11 +150,22 @@ def create_rental_booking(db: Session, user_id: str, items_req: list, start_date
     )
     db.add(sec_deposit)
 
+    # Map input payment_method string to valid PostgreSQL PaymentMethod enum
+    pm_upper = (payment_method or "CARD").upper()
+    if "CARD" in pm_upper:
+        valid_pm = PaymentMethod.CREDIT_CARD
+    elif "UPI" in pm_upper:
+        valid_pm = PaymentMethod.UPI
+    elif "CASH" in pm_upper:
+        valid_pm = PaymentMethod.CASH
+    else:
+        valid_pm = PaymentMethod.RAZORPAY
+
     # Add payment transaction record
     payment = Payment(
         rental_id=new_rental.id,
         transaction_id=f"TXN-{random.randint(100000, 999999)}",
-        payment_method=payment_method,
+        payment_method=valid_pm,
         payment_type=PaymentType.INITIAL_BOOKING,
         amount=grand_total,
         status=PaymentStatus.SUCCESS

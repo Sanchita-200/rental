@@ -38,3 +38,16 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     avatar_url: Optional[str] = None
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+    reset_url: Optional[str] = None
+    reset_token: Optional[str] = None
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+

@@ -1,32 +1,40 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Lock, CheckCircle2, ArrowRight, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { useSupabaseAuth } from '../../context/SupabaseAuthContext';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { Lock, CheckCircle2, ArrowRight, Shield, Eye, EyeOff, AlertCircle, KeyRound, AlertTriangle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export const ResetPasswordPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token') || '';
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const { updateUserPassword, isLoading } = useSupabaseAuth();
+  const { resetPassword } = useAuth();
   const navigate = useNavigate();
 
-  const hasMinLength = password.length >= 12;
+  const hasMinLength = password.length >= 6;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
-  const hasSpecial = /[^A-Za-z0-9]/.test(password);
-  const passedCount = [hasMinLength, hasUppercase, hasLowercase, hasNumber, hasSpecial].filter(Boolean).length;
-  const strengthPercentage = (passedCount / 5) * 100;
+  const passedCount = [hasMinLength, hasUppercase, hasLowercase, hasNumber].filter(Boolean).length;
+  const strengthPercentage = (passedCount / 4) * 100;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (passedCount < 5) {
-      setErrorMessage('Password does not satisfy all strength requirements.');
+    if (!token) {
+      setErrorMessage('Missing password reset token. Please request a new reset link.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long.');
       return;
     }
 
@@ -35,13 +43,50 @@ export const ResetPasswordPage: React.FC = () => {
       return;
     }
 
+    setLoading(true);
     try {
-      await updateUserPassword(password);
+      await resetPassword(token, password);
       setSuccess(true);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to update password.');
+      setErrorMessage(
+        err.response?.data?.detail || err.message || 'Failed to update password. Link may be expired.'
+      );
+    } finally {
+      setLoading(false);
     }
   };
+
+  // If accessed directly without token, display security guidance
+  if (!token && !success) {
+    return (
+      <div className="min-h-[calc(100vh-65px)] flex items-center justify-center p-6 bg-[#07140F]">
+        <div className="w-full max-w-md glass-panel rounded-3xl p-8 border border-amber-500/30 shadow-2xl text-center space-y-6">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+            <AlertTriangle className="w-7 h-7" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-extrabold text-white">Reset Token Required</h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              To reset your password securely, please enter your registered email address to receive a verified recovery link.
+            </p>
+          </div>
+
+          <Link
+            to="/forgot-password"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-500 text-slate-950 font-bold text-xs uppercase tracking-wider inline-block shadow-lg glow-emerald hover:opacity-95 transition-opacity"
+          >
+            Request Password Reset Link
+          </Link>
+
+          <div>
+            <Link to="/login" className="text-xs text-slate-400 hover:text-white underline">
+              Return to Login
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[calc(100vh-65px)] flex items-center justify-center p-6 bg-[#07140F]">
@@ -49,17 +94,19 @@ export const ResetPasswordPage: React.FC = () => {
         
         <div className="space-y-2 text-center">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-green-500 flex items-center justify-center mx-auto shadow-lg glow-emerald">
-            <Shield className="w-6 h-6 text-slate-950" />
+            <KeyRound className="w-6 h-6 text-slate-950" />
           </div>
           <h2 className="text-2xl font-extrabold text-white">Set New Password</h2>
-          <p className="text-xs text-slate-400">Choose a strong password with at least 12 characters</p>
+          <p className="text-xs text-slate-400">Create a secure new password for your account</p>
         </div>
 
         {success ? (
           <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-4">
             <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
             <h3 className="text-base font-bold text-white">Password Updated Successfully!</h3>
-            <p className="text-xs text-slate-300">Your Supabase security credentials have been updated.</p>
+            <p className="text-xs text-slate-300">
+              Your password has been saved to the database. You can now log in with your new credentials.
+            </p>
             <Link
               to="/login"
               className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-500 text-slate-950 font-bold text-xs uppercase tracking-wider inline-block shadow-lg glow-emerald text-center"
@@ -81,7 +128,7 @@ export const ResetPasswordPage: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••••••"
-                  className="w-full bg-[#07140F] border border-green-500/20 focus:border-emerald-400 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white focus:outline-none"
+                  className="w-full bg-[#07140F] border border-green-500/20 focus:border-emerald-400 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white focus:outline-none transition-colors"
                 />
                 <button
                   type="button"
@@ -119,7 +166,7 @@ export const ResetPasswordPage: React.FC = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   placeholder="••••••••••••"
-                  className="w-full bg-[#07140F] border border-green-500/20 focus:border-emerald-400 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white focus:outline-none"
+                  className="w-full bg-[#07140F] border border-green-500/20 focus:border-emerald-400 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white focus:outline-none transition-colors"
                 />
               </div>
             </div>
@@ -133,10 +180,10 @@ export const ResetPasswordPage: React.FC = () => {
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-400 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg glow-emerald hover:opacity-95 transition-opacity flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-400 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg glow-emerald hover:opacity-95 transition-opacity flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>{isLoading ? 'Updating...' : 'Update Password'}</span>
+              <span>{loading ? 'Updating Password...' : 'Update Password'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

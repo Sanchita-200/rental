@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 # 24 hours
     
-    DATABASE_URL: str = "sqlite:///./rentflow.db"
+    DATABASE_URL: str = "postgresql://postgres:KritiSreyash%40123@db.lhzjfkvxgfyengxcwhsl.supabase.co:5432/postgres"
     
     CORS_ORIGINS: List[str] = [
         "http://localhost:5173",

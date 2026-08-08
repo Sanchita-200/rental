@@ -20,6 +20,18 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface ForgotPasswordResponse {
+  message: string;
+  reset_url?: string;
+  reset_token?: string;
+}
+
+export interface UpdateProfilePayload {
+  full_name?: string;
+  phone?: string;
+  avatar_url?: string;
+}
+
 export const authApi = {
   login: async (payload: LoginPayload): Promise<AuthResponse> => {
     const res = await apiClient.post('/auth/login', payload);
@@ -31,6 +43,18 @@ export const authApi = {
   },
   getMe: async (): Promise<User> => {
     const res = await apiClient.get('/auth/me');
+    return res.data;
+  },
+  updateProfile: async (payload: UpdateProfilePayload): Promise<User> => {
+    const res = await apiClient.put('/users/profile', payload);
+    return res.data;
+  },
+  forgotPassword: async (email: string): Promise<ForgotPasswordResponse> => {
+    const res = await apiClient.post('/auth/forgot-password', { email });
+    return res.data;
+  },
+  resetPassword: async (payload: { token: string; new_password: string }): Promise<{ message: string }> => {
+    const res = await apiClient.post('/auth/reset-password', payload);
     return res.data;
   },
 };

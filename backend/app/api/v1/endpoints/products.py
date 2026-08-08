@@ -55,6 +55,48 @@ def get_product(product_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Product not found")
     return ProductResponse.model_validate(product)
 
+@router.get("/{product_id}/availability")
+def check_product_availability(
+    product_id: str,
+    start_date: str = Query(..., description="ISO start date e.g. 2026-08-10T09:00:00Z"),
+    end_date: str = Query(..., description="ISO end date e.g. 2026-08-12T20:00:00Z"),
+    db: Session = Depends(get_db)
+):
+    from datetime import datetime
+    from app.services.rental_service import check_variant_availability
+
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product or product.status != ProductStatus.AVAILABLE:
+        return {
+            "product_id": product_id,
+            "available": False,
+            "available_units": 0,
+            "total_units": 0,
+            "message": "Product is currently out of stock or inactive"
+        }
+
+    try:
+        dt_start = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+        dt_end = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid ISO date format for start_date or end_date")
+
+    variant = check_variant_availability(db, product_id, dt_start, dt_end)
+    
+    total_variants = db.query(ProductVariant).filter(
+        ProductVariant.product_id == product_id,
+        ProductVariant.is_available == True
+    ).count()
+
+    is_avail = variant is not None
+    return {
+        "product_id": product_id,
+        "available": is_avail,
+        "available_units": total_variants if is_avail else 0,
+        "total_units": total_variants,
+        "message": "Unit available for selected dates" if is_avail else "No available units during selected date range"
+    }
+
 @router.put("/{product_id}", response_model=ProductResponse)
 def update_product(product_id: str, req: ProductUpdate, db: Session = Depends(get_db), current_user = Depends(require_admin)):
     product = db.query(Product).filter(Product.id == product_id).first()

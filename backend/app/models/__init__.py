@@ -6,6 +6,7 @@ from app.models.rental import Rental, RentalItem, RentalStatus
 from app.models.deposit import SecurityDeposit, DepositStatus
 from app.models.payment import Payment, PaymentMethod, PaymentType, PaymentStatus
 from app.models.invoice import Invoice
+from app.models.cart import DBCartItem
 
 __all__ = [
     "Base",
@@ -27,5 +28,6 @@ __all__ = [
     "PaymentMethod",
     "PaymentType",
     "PaymentStatus",
-    "Invoice"
+    "Invoice",
+    "DBCartItem"
 ]

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { QrCode, Search, CheckCircle2, AlertTriangle, Shield, Check, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { QrCode, Search, CheckCircle2, AlertTriangle, Shield, Check, Clock, ArrowLeft, LayoutDashboard } from 'lucide-react';
 import { QRScannerModal } from '../../components/features/operations/QRScannerModal';
 import { operationsApi } from '../../api/operations.api';
-import type { QRVerificationResponse } from '../../types';
+import type { QRVerificationResponse, RentalItem } from '../../types';
 import { StatusBadge } from '../../components/common/StatusBadge';
 
 export const PickupReturnOpsPage: React.FC = () => {
@@ -24,7 +25,7 @@ export const PickupReturnOpsPage: React.FC = () => {
     try {
       const updated = await operationsApi.processPickup(scanResult.rental.id);
       setSuccessMsg(`Pickup confirmed for booking ${updated.rental_code}! Status changed to PICKED_UP.`);
-      setScanResult((prev) => prev ? { ...prev, rental: updated, action_type: 'RETURN' } : null);
+      setScanResult((prev: QRVerificationResponse | null) => prev ? { ...prev, rental: updated, action_type: 'RETURN' } : null);
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Pickup processing failed');
     } finally {
@@ -42,7 +43,7 @@ export const PickupReturnOpsPage: React.FC = () => {
         forfeit_reason: forfeitReason || undefined
       });
       setSuccessMsg(`Return completed for booking ${updated.rental_code}! Security deposit settled and invoice issued.`);
-      setScanResult((prev) => prev ? { ...prev, rental: updated } : null);
+      setScanResult((prev: QRVerificationResponse | null) => prev ? { ...prev, rental: updated } : null);
     } catch (err: any) {
       alert(err.response?.data?.detail || 'Return processing failed');
     } finally {
@@ -53,6 +54,17 @@ export const PickupReturnOpsPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       
+      {/* Top Breadcrumb Header */}
+      <div className="flex items-center justify-between">
+        <Link
+          to="/admin/dashboard"
+          className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors bg-[#0E1F18] border border-green-500/20 px-3 py-1.5 rounded-xl"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Admin Cockpit</span>
+        </Link>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black text-white">Pickup & Return Operations Station</h1>
@@ -90,7 +102,7 @@ export const PickupReturnOpsPage: React.FC = () => {
           {/* Items checklist */}
           <div className="space-y-2">
             <span className="text-xs font-bold text-slate-300 block">Equipment Checklist:</span>
-            {scanResult.rental.items.map((item) => (
+            {scanResult.rental.items.map((item: RentalItem) => (
               <div key={item.id} className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
                 <div>
                   <span className="font-bold text-white block">{item.product_variant?.variant_name || 'Equipment Unit'}</span>

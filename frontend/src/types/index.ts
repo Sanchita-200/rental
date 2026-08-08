@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'CUSTOMER';
+export type UserRole = 'ADMIN' | 'VENDOR' | 'CUSTOMER';
 export type KYCStatus = 'VERIFIED' | 'PENDING' | 'UNVERIFIED';
 
 export interface User {

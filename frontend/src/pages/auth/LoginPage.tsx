@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Shield, Lock, Mail, Eye, EyeOff, CheckCircle2, ArrowRight, Sparkles, AlertCircle, Building2, Database } from 'lucide-react';
-import { useSupabaseAuth } from '../../context/SupabaseAuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('admin@rentflow.com');
@@ -10,30 +10,41 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { login, isLoading, isConfigured } = useSupabaseAuth();
+  const { login, isLoading, isConfigured } = useAuth();
   const navigate = useNavigate();
 
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isEmailValid = email.trim().length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!email || !password || !isEmailValid) {
-      setErrorMessage('Invalid user id and password');
+    if (!email.trim() || !password.trim()) {
+      setErrorMessage('Invalid User ID or Password.');
       return;
     }
 
     try {
-      await login(email, password);
-      // Determine redirection by email role rule or user profile role
-      if (email.includes('admin') || email.includes('vendor')) {
-        navigate('/admin/dashboard');
+      await login(email.trim(), password);
+      // Decode role from JWT to determine the correct dashboard
+      const token = localStorage.getItem('rentflow_token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const role = (payload.role || '').toUpperCase();
+          if (role === 'ADMIN') {
+            navigate('/admin/dashboard');
+          } else {
+            navigate('/catalog');
+          }
+        } catch {
+          navigate('/catalog');
+        }
       } else {
         navigate('/catalog');
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Invalid user id and password');
+      setErrorMessage('Invalid User ID or Password.');
     }
   };
 
@@ -54,7 +65,7 @@ export const LoginPage: React.FC = () => {
 
         <div className="relative z-10 space-y-6 max-w-lg">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-emerald-400 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" /> Powered by Supabase Authentication
+            <Sparkles className="w-3.5 h-3.5" /> Enterprise Authentication Engine
           </div>
 
           <h1 className="text-4xl font-extrabold text-white leading-tight">
@@ -169,7 +180,7 @@ export const LoginPage: React.FC = () => {
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-slate-300">Password</label>
-                <Link to="/reset-password" className="text-[11px] text-emerald-400 hover:underline font-medium">
+                <Link to="/forgot-password" className="text-[11px] text-emerald-400 hover:underline font-medium">
                   Forgot Password?
                 </Link>
               </div>
@@ -222,7 +233,7 @@ export const LoginPage: React.FC = () => {
               className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-400 text-slate-950 font-extrabold text-xs uppercase tracking-wider shadow-lg glow-emerald hover:opacity-95 transition-opacity flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <span>Authenticating with Supabase...</span>
+                <span>Authenticating...</span>
               ) : (
                 <>
                   <span>Sign In</span>

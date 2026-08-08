@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Sparkles, DollarSign, Calendar } from 'lucide-react';
+import { TrendingUp, Sparkles, DollarSign, Calendar, ArrowLeft } from 'lucide-react';
 import { analyticsApi } from '../../api/analytics.api';
 import { aiApi } from '../../api/ai.api';
 import type { RevenuePoint, AIDemandForecastResponse } from '../../types';
@@ -23,6 +24,17 @@ export const AnalyticsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 space-y-8">
       
+      {/* Top Breadcrumb Header */}
+      <div className="flex items-center justify-between">
+        <Link
+          to="/admin/dashboard"
+          className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors bg-[#0E1F18] border border-green-500/20 px-3 py-1.5 rounded-xl"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Admin Cockpit</span>
+        </Link>
+      </div>
+
       <div>
         <h1 className="text-2xl font-black text-white">Revenue & Demand Analytics</h1>
         <p className="text-xs text-slate-400">Financial trends, late fee collections, and AI predictive demand growth</p>

@@ -12,8 +12,9 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
 import { InvoiceView } from '../../components/features/invoices/InvoiceView';
+import { rentalsApi } from '../../api/rentals.api';
 
-// Mock Data strictly matching Excalidraw Wireframe diagram
+// Orders schema matching Excalidraw Wireframe diagram
 interface RentalOrderWireframe {
   id: string;
   orderRef: string;
@@ -40,6 +41,60 @@ const WIREFRAME_ORDERS: RentalOrderWireframe[] = [
 
 export const AdminDashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
+  const [ordersList, setOrdersList] = useState<RentalOrderWireframe[]>([]);
+  const [isLoadingRealOrders, setIsLoadingRealOrders] = useState(true);
+
+  // Load 100% real rental orders from the live database
+  useEffect(() => {
+    const loadRealRentals = async () => {
+      try {
+        setIsLoadingRealOrders(true);
+        const dbRentals = await rentalsApi.getAllRentalsAdmin();
+
+        const statusMap: Record<string, RentalOrderWireframe['status']> = {
+          RESERVED: 'Reserved',
+          PICKED_UP: 'Picked Up',
+          OVERDUE: 'Late pickup',
+          RETURNED: 'Reserved',
+          CANCELLED: 'Cancelled',
+        };
+
+        const invoiceStatusMap: Record<string, RentalOrderWireframe['invoiceStatus']> = {
+          RESERVED: 'Sale order Confirmed',
+          PICKED_UP: 'Invoiced',
+          OVERDUE: 'Invoiced',
+          RETURNED: 'Invoiced',
+          CANCELLED: 'Nothing to Invoice',
+        };
+
+        const dbMapped: RentalOrderWireframe[] = (dbRentals || []).map((r) => ({
+          id: r.id,
+          orderRef: r.rental_code,
+          // Use real customer name from DB if available
+          customer: r.user?.full_name || `Customer #${r.user_id.slice(0, 6).toUpperCase()}`,
+          // Use real product names from rental items if available
+          product: r.items?.length > 0
+            ? `${r.items.length} Item(s) — Rental Package`
+            : 'Equipment Rental Package',
+          pickupDate: new Date(r.start_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+          returnDate: new Date(r.end_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+          totalAmount: r.grand_total,
+          status: statusMap[r.status] ?? 'Reserved',
+          invoiceStatus: invoiceStatusMap[r.status] ?? 'Sale order Confirmed',
+          durationDays: Math.max(1, Math.ceil((new Date(r.end_date).getTime() - new Date(r.start_date).getTime()) / 86400000)),
+        }));
+
+        setOrdersList(dbMapped);
+      } catch (err) {
+        console.error('Failed to load DB rentals for admin:', err);
+        setOrdersList([]);
+      } finally {
+        setIsLoadingRealOrders(false);
+      }
+    };
+
+    loadRealRentals();
+  }, []);
 
   // Navigation Tabs: Orders, Schedule, Products, Reports, Settings
   const [activeTab, setActiveTab] = useState<'Orders' | 'Schedule' | 'Products' | 'Reports' | 'Settings'>('Orders');
@@ -84,15 +139,15 @@ export const AdminDashboardPage: React.FC = () => {
   };
 
   const toggleSelectAll = () => {
-    if (selectedOrders.length === WIREFRAME_ORDERS.length) {
+    if (selectedOrders.length === ordersList.length) {
       setSelectedOrders([]);
     } else {
-      setSelectedOrders(WIREFRAME_ORDERS.map((o) => o.id));
+      setSelectedOrders(ordersList.map((o) => o.id));
     }
   };
 
   // Filter Orders based on search & active filter pill
-  const filteredOrders = WIREFRAME_ORDERS.filter((order) => {
+  const filteredOrders = ordersList.filter((order) => {
     const matchesSearch =
       order.orderRef.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -124,7 +179,7 @@ export const AdminDashboardPage: React.FC = () => {
         
         {/* Left Side: Brand & Main Navigation Tabs */}
         <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+          <Link to="/admin/dashboard" className="flex items-center gap-2.5 shrink-0 group">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 via-green-500 to-emerald-400 flex items-center justify-center shadow-lg glow-emerald group-hover:scale-105 transition-transform">
               <Shield className="w-5 h-5 text-slate-950" />
             </div>
@@ -450,7 +505,7 @@ export const AdminDashboardPage: React.FC = () => {
                             <th className="py-3 px-2 w-8">
                               <input
                                 type="checkbox"
-                                checked={selectedOrders.length === WIREFRAME_ORDERS.length}
+                                checked={ordersList.length > 0 && selectedOrders.length === ordersList.length}
                                 onChange={toggleSelectAll}
                                 className="rounded border-green-500/30 bg-[#07140F] accent-emerald-500"
                               />
@@ -465,7 +520,26 @@ export const AdminDashboardPage: React.FC = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-green-500/10">
-                          {filteredOrders.map((order) => {
+                          {isLoadingRealOrders ? (
+                            <tr>
+                              <td colSpan={8} className="text-center py-12 text-slate-400 text-xs">
+                                <div className="flex flex-col items-center gap-2">
+                                  <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                                  <span>Loading rental orders from database...</span>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : filteredOrders.length === 0 ? (
+                            <tr>
+                              <td colSpan={8} className="text-center py-12 text-slate-400 text-xs">
+                                <div className="flex flex-col items-center gap-3">
+                                  <ShoppingBag className="w-10 h-10 text-slate-600" />
+                                  <p className="font-semibold text-slate-300">No rental orders yet</p>
+                                  <p>Orders will appear here once customers complete bookings.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : filteredOrders.map((order) => {
                             const isChecked = selectedOrders.includes(order.id);
                             return (
                               <tr key={order.id} className={`hover:bg-emerald-500/5 transition-colors ${isChecked ? 'bg-emerald-500/10' : ''}`}>
@@ -498,7 +572,7 @@ export const AdminDashboardPage: React.FC = () => {
                                 </td>
                                 <td className="py-3 px-3 font-mono text-slate-300">{order.pickupDate}</td>
                                 <td className="py-3 px-3 font-mono text-slate-300">{order.returnDate}</td>
-                                <td className="py-3 px-3 font-bold text-white">${order.totalAmount}</td>
+                                <td className="py-3 px-3 font-bold text-white">₹{order.totalAmount}</td>
                                 <td className="py-3 px-3">
                                   <span
                                     className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold text-white shadow-sm inline-block ${

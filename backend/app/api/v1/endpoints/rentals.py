@@ -79,12 +79,25 @@ def checkout_rental(req: RentalCreateRequest, db: Session = Depends(get_db), cur
 
 @router.get("/my-rentals", response_model=List[RentalResponse])
 def get_my_rentals(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    rentals = db.query(Rental).filter(Rental.user_id == current_user.id).order_by(Rental.created_at.desc()).all()
+    from sqlalchemy.orm import joinedload
+    rentals = (
+        db.query(Rental)
+        .options(joinedload(Rental.items), joinedload(Rental.deposit))
+        .filter(Rental.user_id == current_user.id)
+        .order_by(Rental.created_at.desc())
+        .all()
+    )
     return [RentalResponse.model_validate(r) for r in rentals]
 
 @router.get("/admin/all", response_model=List[RentalResponse])
 def list_all_rentals_admin(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
-    rentals = db.query(Rental).order_by(Rental.created_at.desc()).all()
+    from sqlalchemy.orm import joinedload
+    rentals = (
+        db.query(Rental)
+        .options(joinedload(Rental.user), joinedload(Rental.items), joinedload(Rental.deposit))
+        .order_by(Rental.created_at.desc())
+        .all()
+    )
     return [RentalResponse.model_validate(r) for r in rentals]
 
 @router.get("/{rental_id}", response_model=RentalResponse)

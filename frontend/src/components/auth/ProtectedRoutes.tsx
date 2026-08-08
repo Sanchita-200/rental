@@ -1,10 +1,10 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSupabaseAuth } from '../../context/SupabaseAuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { Cpu } from 'lucide-react';
 
 export const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isLoading } = useSupabaseAuth();
+  const { user, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -26,7 +26,7 @@ export const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children 
 };
 
 export const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isLoading } = useSupabaseAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -36,7 +36,7 @@ export const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children
     );
   }
 
-  if (!user || (user.role !== 'admin' && user.role !== 'vendor')) {
+  if (!user || (user.role.toLowerCase() !== 'admin' && user.role.toLowerCase() !== 'vendor')) {
     return <Navigate to="/catalog" replace />;
   }
 
@@ -44,7 +44,7 @@ export const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const RequireVendor: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isLoading } = useSupabaseAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -54,7 +54,7 @@ export const RequireVendor: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   }
 
-  if (!user || (user.role !== 'vendor' && user.role !== 'admin')) {
+  if (!user || (user.role.toLowerCase() !== 'vendor' && user.role.toLowerCase() !== 'admin')) {
     return <Navigate to="/catalog" replace />;
   }
 

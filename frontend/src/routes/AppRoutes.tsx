@@ -102,6 +102,9 @@ export const AppRoutes: React.FC = () => {
           }
         />
 
+        {/* Vendor and Admin share the same dashboard */}
+        <Route path="/vendor/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>

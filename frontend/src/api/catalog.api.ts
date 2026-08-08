@@ -22,4 +22,10 @@ export const catalogApi = {
     const res = await apiClient.post(`/products/${productId}/variants`, variantData);
     return res.data;
   },
+  checkAvailability: async (productId: string, startDate: string, endDate: string): Promise<{ product_id: string; available: boolean; available_units: number; total_units: number; message: string }> => {
+    const res = await apiClient.get(`/products/${productId}/availability`, {
+      params: { start_date: startDate, end_date: endDate }
+    });
+    return res.data;
+  },
 };
