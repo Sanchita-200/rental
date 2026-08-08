@@ -10,7 +10,7 @@ export const SignUpPage: React.FC = () => {
   const location = useLocation();
   const redirectMessage = location.state?.message || null;
 
-  const [accountType, setAccountType] = useState<'customer' | 'admin'>('customer');
+  const accountType = 'customer';
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -73,12 +73,7 @@ export const SignUpPage: React.FC = () => {
         role: accountType,
       });
 
-      // Both admin and vendor go to admin dashboard
-      if (accountType === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/catalog');
-      }
+      navigate('/catalog');
     } catch (err: any) {
       setErrorMessage(err.response?.data?.detail || err.message || 'Registration failed');
     }
@@ -169,32 +164,6 @@ export const SignUpPage: React.FC = () => {
               <span>{redirectMessage}</span>
             </div>
           )}
-
-          {/* Account Type Selector */}
-          <div className="grid grid-cols-2 gap-2 bg-[#07140F] p-1.5 rounded-2xl border border-green-500/20">
-            <button
-              type="button"
-              onClick={() => setAccountType('customer')}
-              className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                accountType === 'customer'
-                  ? 'bg-gradient-to-r from-emerald-600 to-green-500 text-slate-950 font-black shadow-lg glow-emerald'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Customer / Renter
-            </button>
-            <button
-              type="button"
-              onClick={() => setAccountType('admin')}
-              className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                accountType === 'admin'
-                  ? 'bg-gradient-to-r from-emerald-600 to-green-500 text-slate-950 font-black shadow-lg glow-emerald'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Store Manager / Admin
-            </button>
-          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
