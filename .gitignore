@@ -1,0 +1,25 @@
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.env
+frontend/.env
+*.local
+
+# Python / Backend
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+backend/venv/
+.venv/
+*.db
+*.sqlite3
+backend/rentflow.db
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
