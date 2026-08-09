@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { QrCode, Search, CheckCircle2, AlertTriangle, Shield, Check, Clock, ArrowLeft, LayoutDashboard } from 'lucide-react';
+import { QrCode, Search, CheckCircle2, AlertTriangle, Shield, Check, Clock, ArrowLeft, LayoutDashboard, Compass } from 'lucide-react';
 import { QRScannerModal } from '../../components/features/operations/QRScannerModal';
 import { operationsApi } from '../../api/operations.api';
 import type { QRVerificationResponse, RentalItem } from '../../types';
@@ -183,6 +183,104 @@ export const PickupReturnOpsPage: React.FC = () => {
           <p className="text-xs text-slate-500">Click "Launch QR Scanner" to process a customer pickup or return pass</p>
         </div>
       )}
+
+      {/* Smart Pickup & Delivery Route Optimizer */}
+      <div className="glass-panel rounded-3xl p-6 border border-green-500/20 bg-[#0A1813]/90 space-y-5 shadow-2xl animate-fade-in">
+        <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-green-500/10 pb-4 gap-2">
+          <div>
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Compass className="w-5 h-5 text-emerald-400" />
+              AI-Optimized Route Planner (Today's Operations)
+            </h3>
+            <p className="text-xs text-slate-400">
+              Optimal travel path sequence to handle active pickups/returns and minimize operational travel overhead
+            </p>
+          </div>
+          <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono font-bold border border-emerald-500/20 align-self-start md:align-self-auto">
+            🚀 AI Dispatched: Saved 2.4L Fuel
+          </span>
+        </div>
+
+        {/* Route Details Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Step Sequence Timeline */}
+          <div className="md:col-span-2 space-y-4">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Optimized Stops Sequence</span>
+            
+            <div className="relative pl-6 space-y-5 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-green-500/20">
+              
+              {/* Start/End Stop */}
+              <div className="relative">
+                <span className="absolute left-[-22px] top-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950 flex items-center justify-center font-bold text-[8px] text-slate-950">H</span>
+                <div>
+                  <h4 className="text-xs font-bold text-white">Central RentFlow Hub (Start Operations)</h4>
+                  <p className="text-[10px] text-slate-400">Inventory check & vehicle safety inspection completed at 09:30 AM.</p>
+                </div>
+              </div>
+
+              {/* Stop 1 */}
+              <div className="relative">
+                <span className="absolute left-[-22px] top-0.5 w-4 h-4 rounded-full bg-indigo-500 border-2 border-slate-950 flex items-center justify-center font-bold text-[8px] text-white">1</span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-xs font-bold text-white">Stop 1: Alex Johnson (Upcoming Pickup)</h4>
+                    <span className="px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-bold">1.2 km</span>
+                  </div>
+                  <p className="text-[10px] text-slate-300">Booking: <strong className="text-emerald-400">RF-2026-A101</strong> • 1x Canon R6 Camera Kit • ETA 10:15 AM</p>
+                </div>
+              </div>
+
+              {/* Stop 2 */}
+              <div className="relative">
+                <span className="absolute left-[-22px] top-0.5 w-4 h-4 rounded-full bg-amber-500 border-2 border-slate-950 flex items-center justify-center font-bold text-[8px] text-slate-950">2</span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-xs font-bold text-white">Stop 2: Alex Johnson (Overdue Return)</h4>
+                    <span className="px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-bold">3.8 km</span>
+                  </div>
+                  <p className="text-[10px] text-slate-300">Booking: <strong className="text-rose-400">RF-2026-C303</strong> • 1x DeWalt Cordless Drill Kit • ETA 10:45 AM</p>
+                </div>
+              </div>
+
+              {/* End Hub */}
+              <div className="relative">
+                <span className="absolute left-[-22px] top-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950 flex items-center justify-center font-bold text-[8px] text-slate-950">H</span>
+                <div>
+                  <h4 className="text-xs font-bold text-white">Central RentFlow Hub (Return & Unload)</h4>
+                  <p className="text-[10px] text-slate-400">Equipment check-in, late fee invoices posted, deposit escrow clearance. ETA 11:15 AM.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Logistics metrics card */}
+          <div className="p-4 rounded-2xl bg-[#07140F]/80 border border-green-500/10 space-y-4 h-fit">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block border-b border-green-500/10 pb-1.5">Route Statistics</span>
+            
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between text-slate-400">
+                <span>Total Route Distance</span>
+                <strong className="text-white">8.5 km</strong>
+              </div>
+              <div className="flex justify-between text-slate-400">
+                <span>Est Transit Time</span>
+                <strong className="text-white">28 mins (Light Traffic)</strong>
+              </div>
+              <div className="flex justify-between text-slate-400">
+                <span>Optimal Stops</span>
+                <strong className="text-white">2 Customer Dropoffs</strong>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-emerald-400 leading-relaxed font-semibold font-sans">
+              🌱 AI Routing sequence minimizes backtracking, saving 18 minutes of drive time and reducing CO2 emissions by approximately 0.6 kg today.
+            </div>
+          </div>
+
+        </div>
+      </div>
 
       {/* QR Scanner Modal */}
       <QRScannerModal

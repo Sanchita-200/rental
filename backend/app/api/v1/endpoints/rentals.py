@@ -126,3 +126,70 @@ def cancel_rental(rental_id: str, db: Session = Depends(get_db), current_user: U
     db.commit()
     db.refresh(rental)
     return RentalResponse.model_validate(rental)
+
+@router.patch("/{rental_id}/status", response_model=RentalResponse)
+def advance_rental_status(
+    rental_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """
+    Admin endpoint to advance rental lifecycle:
+      RESERVED → PICKED_UP → RETURNED
+    On RETURNED: calculates late fees and settles deposit automatically.
+    """
+    from datetime import datetime, timezone
+    from app.models.deposit import SecurityDeposit, DepositStatus
+    from app.services.late_fee_service import calculate_late_fee
+
+    rental = db.query(Rental).filter(Rental.id == rental_id).first()
+    if not rental:
+        raise HTTPException(status_code=404, detail="Rental not found")
+
+    transitions = {
+        RentalStatus.RESERVED: RentalStatus.PICKED_UP,
+        RentalStatus.PICKED_UP: RentalStatus.RETURNED,
+        RentalStatus.OVERDUE: RentalStatus.RETURNED,
+    }
+
+    next_status = transitions.get(rental.status)
+    if not next_status:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot advance rental from status '{rental.status}'"
+        )
+
+    rental.status = next_status
+
+    if next_status == RentalStatus.RETURNED:
+        now = datetime.now(timezone.utc)
+        rental.actual_return_date = now
+
+        # Auto-detect overdue and calculate late fee
+        end_aware = rental.end_date.replace(tzinfo=timezone.utc) if rental.end_date.tzinfo is None else rental.end_date
+        overdue_seconds = max(0, (now - end_aware).total_seconds())
+        overdue_days = overdue_seconds / 86400
+
+        late_fee = 0.0
+        if overdue_days > 0:
+            # 1.5x daily rate per overdue day, capped at deposit amount
+            daily_rate = rental.subtotal_rent_amount / max(1, (rental.end_date - rental.start_date).days)
+            late_fee = round(min(overdue_days * daily_rate * 1.5, rental.total_deposit_amount), 2)
+
+        rental.total_late_fee = late_fee
+
+        # Settle deposit
+        if rental.deposit:
+            refunded = max(0.0, rental.total_deposit_amount - late_fee)
+            rental.deposit.status = DepositStatus.REFUNDED if late_fee == 0 else DepositStatus.PARTIALLY_REFUNDED
+            rental.deposit.refunded_amount = refunded
+            rental.deposit.deducted_amount = late_fee
+
+        # Free up the product variant
+        for item in rental.items:
+            if item.product_variant:
+                item.product_variant.is_available = True
+
+    db.commit()
+    db.refresh(rental)
+    return RentalResponse.model_validate(rental)

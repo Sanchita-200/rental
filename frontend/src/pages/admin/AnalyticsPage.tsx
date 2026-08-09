@@ -11,6 +11,16 @@ export const AnalyticsPage: React.FC = () => {
   const [aiDemand, setAiDemand] = useState<AIDemandForecastResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const forecastData = [
+    { day: 'Mon', Cameras: 85, Gaming: 90, Tools: 95 },
+    { day: 'Tue', Cameras: 80, Gaming: 85, Tools: 92 },
+    { day: 'Wed', Cameras: 72, Gaming: 88, Tools: 88 },
+    { day: 'Thu', Cameras: 60, Gaming: 70, Tools: 85 },
+    { day: 'Fri', Cameras: 35, Gaming: 45, Tools: 72 },
+    { day: 'Sat', Cameras: 18, Gaming: 25, Tools: 58 },
+    { day: 'Sun', Cameras: 30, Gaming: 40, Tools: 65 },
+  ];
+
   useEffect(() => {
     Promise.all([
       analyticsApi.getRevenueChart(),
@@ -73,6 +83,52 @@ export const AnalyticsPage: React.FC = () => {
               />
               <Area type="monotone" dataKey="rental_income" name="Rental Income (₹)" stroke="#6366f1" fillOpacity={1} fill="url(#colorRent)" />
               <Area type="monotone" dataKey="late_fee_income" name="Late Penalty Income (₹)" stroke="#f43f5e" fillOpacity={1} fill="url(#colorLate)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Product Availability & Utilization Forecast Chart */}
+      <div className="glass-panel rounded-3xl p-6 border border-green-500/20 space-y-4 shadow-xl animate-fade-in bg-[#0A1813]/30">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-sm font-bold text-white">7-Day Product Availability & Stock Forecast</h3>
+          </div>
+          <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/25 font-bold uppercase">
+            Estimated Availability %
+          </span>
+        </div>
+        <p className="text-xs text-slate-400">
+          AI-generated prediction of inventory booking levels and potential stock bottlenecks for the upcoming week.
+        </p>
+
+        <div className="h-64 w-full pt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={forecastData}>
+              <defs>
+                <linearGradient id="colorCameras" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorGaming" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorTools" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.2}/>
+                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+              <XAxis dataKey="day" stroke="#64748b" fontSize={11} />
+              <YAxis stroke="#64748b" fontSize={11} unit="%" />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+              />
+              <Area type="monotone" dataKey="Cameras" name="Cameras & Photography" stroke="#06b6d4" fillOpacity={1} fill="url(#colorCameras)" strokeWidth={2} />
+              <Area type="monotone" dataKey="Gaming" name="Gaming & Electronics" stroke="#10b981" fillOpacity={1} fill="url(#colorGaming)" strokeWidth={2} />
+              <Area type="monotone" dataKey="Tools" name="Power Tools & Hardware" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorTools)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

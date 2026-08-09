@@ -26,4 +26,8 @@ export const rentalsApi = {
     const res = await apiClient.post(`/rentals/${id}/cancel`);
     return res.data;
   },
+  advanceRentalStatus: async (id: string): Promise<Rental> => {
+    const res = await apiClient.patch(`/rentals/${id}/status`);
+    return res.data;
+  },
 };

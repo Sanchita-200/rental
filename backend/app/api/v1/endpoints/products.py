@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db
 from app.core.dependencies import require_admin
 from app.models.product import Product, ProductVariant, ProductStatus
@@ -15,19 +15,35 @@ def list_products(
     search: Optional[str] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
+    vendor_id: Optional[str] = None,
+    status: Optional[str] = None,
+    limit: int = Query(default=60, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db)
 ):
-    query = db.query(Product)
+    # Use joinedload to avoid N+1 queries for category
+    query = db.query(Product).options(joinedload(Product.category))
+    
+    # Only show AVAILABLE products to customers by default
+    if status:
+        query = query.filter(Product.status == status)
+    else:
+        query = query.filter(Product.status == ProductStatus.AVAILABLE)
+    
     if category_id:
         query = query.filter(Product.category_id == category_id)
+    if vendor_id:
+        query = query.filter(Product.vendor_id == vendor_id)
     if search:
-        query = query.filter(Product.title.ilike(f"%{search}%") | Product.description.ilike(f"%{search}%"))
+        query = query.filter(
+            Product.title.ilike(f"%{search}%") | Product.description.ilike(f"%{search}%")
+        )
     if min_price is not None:
         query = query.filter(Product.base_daily_rate >= min_price)
     if max_price is not None:
         query = query.filter(Product.base_daily_rate <= max_price)
     
-    products = query.all()
+    products = query.order_by(Product.created_at.desc()).offset(offset).limit(limit).all()
     return [ProductResponse.model_validate(p) for p in products]
 
 @router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
@@ -35,6 +51,7 @@ def create_product(req: ProductCreate, db: Session = Depends(get_db), current_us
     slug = req.slug or req.title.lower().replace(" ", "-").replace("/", "-")
     product = Product(
         category_id=req.category_id,
+        vendor_id=getattr(req, 'vendor_id', None) or current_user.id,
         title=req.title,
         slug=slug,
         description=req.description,
@@ -50,10 +67,16 @@ def create_product(req: ProductCreate, db: Session = Depends(get_db), current_us
 
 @router.get("/{product_id}", response_model=ProductResponse)
 def get_product(product_id: str, db: Session = Depends(get_db)):
-    product = db.query(Product).filter(Product.id == product_id).first()
+    product = (
+        db.query(Product)
+        .options(joinedload(Product.category))
+        .filter(Product.id == product_id)
+        .first()
+    )
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return ProductResponse.model_validate(product)
+
 
 @router.get("/{product_id}/availability")
 def check_product_availability(

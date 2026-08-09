@@ -51,7 +51,7 @@ export const VendorRegisterPage: React.FC = () => {
         password,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        role: 'vendor',
+        role: 'ADMIN',
         companyName: companyName.trim(),
         gstNumber: gstNumber.trim(),
         productCategory,

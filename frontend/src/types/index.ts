@@ -19,7 +19,7 @@ export interface Category {
   image_url?: string;
 }
 
-export type ProductStatus = 'AVAILABLE' | 'MAINTENANCE' | 'DISCONTINUED';
+export type ProductStatus = 'AVAILABLE' | 'MAINTENANCE' | 'DISCONTINUED' | 'UNAVAILABLE';
 export type ConditionStatus = 'EXCELLENT' | 'GOOD' | 'FAIR' | 'NEEDS_REPAIR';
 
 export interface ProductVariant {

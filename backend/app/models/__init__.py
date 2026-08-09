@@ -7,6 +7,7 @@ from app.models.deposit import SecurityDeposit, DepositStatus
 from app.models.payment import Payment, PaymentMethod, PaymentType, PaymentStatus
 from app.models.invoice import Invoice
 from app.models.cart import DBCartItem
+from app.models.settings import PriceList, ProductAttribute, RentalPeriod
 
 __all__ = [
     "Base",
@@ -29,5 +30,8 @@ __all__ = [
     "PaymentType",
     "PaymentStatus",
     "Invoice",
-    "DBCartItem"
+    "DBCartItem",
+    "PriceList",
+    "ProductAttribute",
+    "RentalPeriod"
 ]

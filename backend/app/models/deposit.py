@@ -6,6 +6,7 @@ from app.models.base import TimeStampedModel
 class DepositStatus(str, enum.Enum):
     HELD = "HELD"
     REFUNDED = "REFUNDED"
+    PARTIALLY_REFUNDED = "PARTIALLY_REFUNDED"
     PARTIALLY_FORFEITED = "PARTIALLY_FORFEITED"
     FORFEITED = "FORFEITED"
 
@@ -17,6 +18,7 @@ class SecurityDeposit(TimeStampedModel):
 
     held_amount = Column(Float, nullable=False)
     refunded_amount = Column(Float, default=0.0)
+    deducted_amount = Column(Float, default=0.0)
     forfeited_amount = Column(Float, default=0.0)
     status = Column(Enum(DepositStatus), default=DepositStatus.HELD, nullable=False)
 

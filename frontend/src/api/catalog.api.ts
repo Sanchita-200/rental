@@ -18,6 +18,13 @@ export const catalogApi = {
     const res = await apiClient.post('/products/', productData);
     return res.data;
   },
+  updateProduct: async (productId: string, productData: any): Promise<Product> => {
+    const res = await apiClient.put(`/products/${productId}`, productData);
+    return res.data;
+  },
+  deleteProduct: async (productId: string): Promise<void> => {
+    await apiClient.delete(`/products/${productId}`);
+  },
   addProductVariant: async (productId: string, variantData: any): Promise<ProductVariant> => {
     const res = await apiClient.post(`/products/${productId}/variants`, variantData);
     return res.data;
